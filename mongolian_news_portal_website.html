@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="mn" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МЭДЭЭ.MN | Орчин үеийн мэдээний портал</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                            accent: '#e11d48'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
+
+    <!-- Top Bar -->
+    <div class="bg-slate-900 text-gray-300 text-xs py-2 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-2">
+            <!-- Left Info & Weather -->
+            <div class="flex items-center space-x-4 flex-wrap justify-center">
+                <span id="current-date" class="font-medium text-gray-400"></span>
+                <span class="hidden sm:inline text-slate-700">|</span>
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-cloud-sun text-amber-400"></i>
+                    <span>Улаанбаатар: <strong class="text-white">+18°C</strong></span>
+                </div>
+                <span class="hidden sm:inline text-slate-700">|</span>
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-dollar-sign text-emerald-400"></i>
+                    <span>USD: <strong class="text-white">3,450₮</strong></span>
+                </div>
+            </div>
+
+            <!-- Ticker Slider -->
+            <div class="flex items-center w-full md:w-auto overflow-hidden">
+                <span class="bg-brand-accent text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider mr-2 whitespace-nowrap">
+                    Шуурхай
+                </span>
+                <div class="overflow-hidden whitespace-nowrap text-ellipsis max-w-xs sm:max-w-md">
+                    <span id="ticker-text" class="text-gray-300 animate-pulse">Засгийн газар ээлжит бус хуралдаанаар чухал шийдвэр гаргалаа...</span>
+                </div>
+            </div>
+
+            <!-- Right Controls & Socials -->
+            <div class="flex items-center space-x-3">
+                <button id="theme-toggle" class="p-1 hover:text-white transition rounded focus:outline-none" title="Харанхуй/Гэрэлт горим">
+                    <i class="fa-solid fa-moon text-sm"></i>
+                </button>
+                <div class="flex space-x-2 border-l border-slate-700 pl-3">
+                    <a href="#" class="hover:text-blue-400 transition"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="hover:text-sky-400 transition"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#" class="hover:text-pink-400 transition"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-40 shadow-sm transition-colors duration-200">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <!-- Logo -->
+            <div class="flex items-center space-x-3">
+                <button id="mobile-menu-btn" class="md:hidden text-2xl text-gray-700 dark:text-gray-200 focus:outline-none">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <a href="#" onclick="filterByCategory('all'); return false;" class="flex items-center space-x-2">
+                    <div class="bg-brand-600 text-white font-extrabold text-2xl px-3 py-1 rounded-lg tracking-wider">МЭДЭЭ</div>
+                    <span class="text-xs font-semibold text-brand-600 dark:text-brand-500 uppercase tracking-widest hidden sm:inline">.MN</span>
+                </a>
+            </div>
+
+            <!-- Ad Space Banner / Placeholder -->
+            <div class="hidden lg:flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl px-8 py-3 w-2/5 shadow-inner">
+                <div class="text-center">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-blue-100">Шинэ технологийн үзэсгэлэн 2026</p>
+                    <p class="text-sm font-bold">Тасалбараа захиалж 20% хөнгөлөлт аваарай</p>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center space-x-3">
+                <button onclick="openBookmarksModal()" class="relative p-2.5 text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-500 transition rounded-full bg-gray-100 dark:bg-slate-700">
+                    <i class="fa-solid fa-bookmark"></i>
+                    <span id="bookmark-count" class="absolute -top-1 -right-1 bg-brand-accent text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">0</span>
+                </button>
+                <button onclick="toggleSearchModal()" class="p-2.5 text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-500 transition rounded-full bg-gray-100 dark:bg-slate-700">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Bar -->
+        <nav class="hidden md:block bg-slate-100 dark:bg-slate-900/50 border-t border-gray-100 dark:border-slate-800">
+            <div class="max-w-7xl mx-auto px-4">
+                <ul class="flex items-center space-x-1 font-medium text-sm overflow-x-auto hide-scrollbar py-1" id="nav-categories">
+                    <!-- Dynamic Nav Items via JS -->
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Mobile Drawer Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 bg-black/60 z-50 hidden md:hidden backdrop-blur-sm transition-opacity">
+        <div class="bg-white dark:bg-slate-800 w-3/4 max-w-sm h-full p-6 flex flex-col justify-between shadow-2xl">
+            <div>
+                <div class="flex justify-between items-center mb-6">
+                    <div class="bg-brand-600 text-white font-extrabold text-xl px-3 py-1 rounded-lg">МЭДЭЭ.MN</div>
+                    <button id="close-mobile-menu" class="text-gray-500 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="space-y-1" id="mobile-nav-categories">
+                    <!-- Dynamic Mobile Nav -->
+                </div>
+            </div>
+            <div class="pt-6 border-t border-gray-200 dark:border-slate-700">
+                <p class="text-xs text-gray-400 text-center">© 2026 МЭДЭЭ.MN Бүх эрх хуулиар хамгаалагдсан.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Search Modal -->
+    <div id="search-modal" class="fixed inset-0 bg-black/70 z-50 hidden backdrop-blur-sm flex items-start justify-center pt-20 px-4">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-700">
+            <div class="p-4 border-b border-gray-100 dark:border-slate-700 flex items-center space-x-3">
+                <i class="fa-solid fa-magnifying-glass text-gray-400 text-xl"></i>
+                <input type="text" id="search-input" placeholder="Мэдээ, нийтлэл хайх..." class="w-full bg-transparent text-lg focus:outline-none dark:text-white" oninput="handleSearch(this.value)">
+                <button onclick="toggleSearchModal()" class="text-gray-400 hover:text-gray-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="search-results" class="max-h-96 overflow-y-auto p-4 divide-y divide-gray-100 dark:divide-slate-700">
+                <p class="text-center text-gray-400 py-8">Хайх үгээ оруулна уу...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-8">
+
+        <!-- Category Banner Indicator (Shows when filtered) -->
+        <div id="category-filter-indicator" class="hidden flex items-center justify-between bg-brand-50 dark:bg-slate-800 p-4 rounded-xl border border-brand-100 dark:border-slate-700">
+            <div class="flex items-center space-x-3">
+                <span class="text-gray-500 dark:text-gray-400 text-sm">Ангилал:</span>
+                <h2 id="current-category-name" class="text-xl font-bold text-brand-600 dark:text-brand-400"></h2>
+            </div>
+            <button onclick="filterByCategory('all')" class="text-xs bg-gray-200 dark:bg-slate-700 px-3 py-1.5 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition">
+                <i class="fa-solid fa-xmark mr-1"></i> Бүх мэдээг харах
+            </button>
+        </div>
+
+        <!-- HERO SECTION: Main Featured Grid -->
+        <section id="hero-section" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Big Main Story (8 Cols) -->
+            <div class="lg:col-span-8" id="hero-main-card">
+                <!-- Dynamically Inserted -->
+            </div>
+
+            <!-- Right 2 Sub Featured Stories (4 Cols) -->
+            <div class="lg:col-span-4 flex flex-col justify-between gap-4" id="hero-sub-cards">
+                <!-- Dynamically Inserted -->
+            </div>
+        </section>
+
+        <!-- MAIN CONTENT & SIDEBAR GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Main News Feed (8 Cols) -->
+            <div class="lg:col-span-8 space-y-8">
+                
+                <!-- Breaking / Latest Feed Section -->
+                <section>
+                    <div class="flex items-center justify-between mb-4 border-b border-gray-200 dark:border-slate-700 pb-3">
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            <span class="w-2.5 h-6 bg-brand-600 rounded-sm inline-block"></span>
+                            Шуурхай мэдээ
+                        </h2>
+                        <span class="flex items-center text-xs text-rose-500 font-semibold animate-pulse">
+                            <span class="w-2 h-2 rounded-full bg-rose-500 mr-1.5"></span> LIVE UPDATE
+                        </span>
+                    </div>
+
+                    <div class="space-y-4" id="latest-news-list">
+                        <!-- Dynamic Latest News List -->
+                    </div>
+                </section>
+
+                <!-- Category Highlights Block (e.g. Economy & Tech) -->
+                <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-brand-600"></i> Эдийн засаг ба Бизнес
+                        </h2>
+                        <button onclick="filterByCategory('Эдийн засаг')" class="text-xs text-brand-600 dark:text-brand-400 font-semibold hover:underline">Бүгдийг харах &rarr;</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="economy-news-grid">
+                        <!-- Dynamic Category News Cards -->
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Right Sidebar Widgets (4 Cols) -->
+            <aside class="lg:col-span-4 space-y-6">
+                
+                <!-- Tabbed Widget (Popular / Discussed) -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-gray-100 dark:border-slate-700 shadow-sm">
+                    <!-- Tabs -->
+                    <div class="flex border-b border-gray-100 dark:border-slate-700 mb-4 text-sm font-bold">
+                        <button onclick="switchTab('popular')" id="tab-popular-btn" class="flex-1 pb-3 text-center border-b-2 border-brand-600 text-brand-600 dark:text-brand-400">
+                            Их уншсан
+                        </button>
+                        <button onclick="switchTab('commented')" id="tab-commented-btn" class="flex-1 pb-3 text-center border-b-2 border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                            Сэтгэгдэлтэй
+                        </button>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div id="tab-content-popular" class="space-y-4">
+                        <!-- Dynamically filled -->
+                    </div>
+                    <div id="tab-content-commented" class="space-y-4 hidden">
+                        <!-- Dynamically filled -->
+                    </div>
+                </div>
+
+                <!-- Opinion / Editorial Column -->
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-6 shadow-md">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-brand-400 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-nib"></i> Нийтлэлчдийн булан
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3 pb-3 border-b border-slate-700">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" class="w-12 h-12 rounded-full object-cover border-2 border-brand-500" alt="Author">
+                            <div>
+                                <h4 class="font-bold text-sm hover:text-brand-400 cursor-pointer transition line-clamp-2">Дэлхийн эдийн засаг ба Монгол улсын боломж</h4>
+                                <p class="text-xs text-gray-400 mt-1">Б.Бат-Эрдэнэ (Эдийн засагч)</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" class="w-12 h-12 rounded-full object-cover border-2 border-brand-500" alt="Author">
+                            <div>
+                                <h4 class="font-bold text-sm hover:text-brand-400 cursor-pointer transition line-clamp-2">Хиймэл интеллект ба ирээдүйн хөдөлмөрийн зах зээл</h4>
+                                <p class="text-xs text-gray-400 mt-1">С.Ариунболд (Технологи судлаач)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Newsletter Subscription Widget -->
+                <div class="bg-brand-50 dark:bg-slate-800/80 p-6 rounded-2xl border border-brand-100 dark:border-slate-700 text-center">
+                    <div class="w-12 h-12 bg-brand-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 text-xl shadow-lg">
+                        <i class="fa-regular fa-paper-plane"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-1">Мэдээлэл захиалах</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Өдөр тутмын чухал мэдээллийг и-мэйлээрээ шууд хүлээн аваарай.</p>
+                    <form onsubmit="handleSubscribe(event)" class="space-y-2">
+                        <input type="email" placeholder="И-мэйл хаяг..." required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:text-white">
+                        <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-md">Захиалах</button>
+                    </form>
+                </div>
+
+            </aside>
+        </div>
+    </main>
+
+    <!-- ARTICLE READER FULL MODAL -->
+    <div id="article-modal" class="fixed inset-0 bg-black/80 z-50 hidden backdrop-blur-md overflow-y-auto">
+        <div class="min-h-screen px-4 text-center">
+            <!-- Background click close trick -->
+            <div class="inline-block w-full max-w-4xl my-8 text-left align-middle transition-all transform bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden relative">
+                
+                <!-- Close Button Sticky -->
+                <button onclick="closeArticleModal()" class="absolute top-4 right-4 z-20 w-10 h-10 bg-black/50 hover:bg-black text-white rounded-full flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <!-- Article Header Banner Image -->
+                <div class="relative h-72 sm:h-96 w-full">
+                    <img id="modal-image" class="w-full h-full object-cover" src="" alt="Article Banner">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                    <div class="absolute bottom-6 left-6 right-6 text-white">
+                        <span id="modal-category" class="bg-brand-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2 inline-block"></span>
+                        <h1 id="modal-title" class="text-2xl sm:text-3xl font-extrabold leading-tight text-white"></h1>
+                        <div class="flex items-center space-x-4 mt-3 text-xs text-gray-300">
+                            <span id="modal-date"><i class="fa-regular fa-clock mr-1"></i></span>
+                            <span id="modal-views"><i class="fa-regular fa-eye mr-1"></i></span>
+                            <button id="modal-bookmark-btn" class="hover:text-amber-400 font-semibold">
+                                <i class="fa-regular fa-bookmark mr-1"></i> Хадгалах
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Article Body Content -->
+                <div class="p-6 sm:p-10 space-y-6">
+                    
+                    <!-- Content Paragraphs -->
+                    <div id="modal-content" class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
+                        <!-- Dynamic Rich Text Content -->
+                    </div>
+
+                    <!-- Share Section -->
+                    <div class="pt-6 border-t border-gray-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-4">
+                        <span class="font-bold text-sm text-gray-700 dark:text-gray-300">Хуваалцах:</span>
+                        <div class="flex space-x-2">
+                            <button onclick="alert('Facebook дээр хуваалцлаа')" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 hover:bg-blue-700 transition">
+                                <i class="fa-brands fa-facebook-f"></i> Facebook
+                            </button>
+                            <button onclick="alert('Twitter дээр хуваалцлаа')" class="bg-sky-500 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 hover:bg-sky-600 transition">
+                                <i class="fa-brands fa-twitter"></i> Twitter
+                            </button>
+                            <button onclick="copyArticleLink()" class="bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 hover:bg-gray-300 transition">
+                                <i class="fa-solid fa-link"></i> Линк хуулах
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Comments Section -->
+                    <div class="pt-8 border-t border-gray-200 dark:border-slate-700 space-y-6">
+                        <h3 class="text-xl font-bold flex items-center gap-2">
+                            <i class="fa-regular fa-comments text-brand-600"></i> Сэтгэгдэл (<span id="modal-comment-count">0</span>)
+                        </h3>
+
+                        <!-- Add Comment Form -->
+                        <form onsubmit="postComment(event)" class="space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <input type="text" id="comment-name" placeholder="Таны нэр..." required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:text-white">
+                            </div>
+                            <textarea id="comment-text" rows="3" placeholder="Сэтгэгдэл бичих..." required class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:text-white"></textarea>
+                            <button type="submit" class="bg-brand-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-brand-700 transition">Илгээх</button>
+                        </form>
+
+                        <!-- Comments List -->
+                        <div id="modal-comments-list" class="space-y-4 pt-4">
+                            <!-- Dynamic Comments -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bookmarks Drawer Modal -->
+    <div id="bookmarks-modal" class="fixed inset-0 bg-black/60 z-50 hidden backdrop-blur-sm flex justify-end">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-md h-full p-6 shadow-2xl flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-6 border-b border-gray-100 dark:border-slate-700 pb-4">
+                    <h3 class="font-bold text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-bookmark text-brand-600"></i> Хадгалсан мэдээллүүд
+                    </h3>
+                    <button onclick="closeBookmarksModal()" class="text-gray-400 hover:text-gray-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div id="bookmarks-list" class="space-y-4 overflow-y-auto max-h-[calc(100vh-180px)]">
+                    <!-- Dynamic Saved News -->
+                </div>
+            </div>
+            <p class="text-xs text-gray-400 text-center">Таны хадгалсан мэдээ энэ төхөөрөмжид үлдэнэ.</p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-gray-300 mt-16 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <!-- Col 1: Brand -->
+                <div class="space-y-4">
+                    <div class="bg-brand-600 text-white font-extrabold text-2xl px-3 py-1 rounded-lg inline-block">МЭДЭЭ.MN</div>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        Монгол улс болон дэлхий дахины шинэ үеийн үнэн бодит, шуурхай мэдээний нэгдсэн портал сайт.
+                    </p>
+                </div>
+
+                <!-- Col 2: Categories -->
+                <div>
+                    <h4 class="text-white font-bold text-sm mb-4">Ангилалууд</h4>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="#" onclick="filterByCategory('Эдийн засаг'); return false;" class="hover:text-white transition">Эдийн засаг</a></li>
+                        <li><a href="#" onclick="filterByCategory('Технологи'); return false;" class="hover:text-white transition">Технологи & Инноваци</a></li>
+                        <li><a href="#" onclick="filterByCategory('Уул уурхай'); return false;" class="hover:text-white transition">Уул уурхай</a></li>
+                        <li><a href="#" onclick="filterByCategory('Спорт'); return false;" class="hover:text-white transition">Спорт & Эрүүл мэнд</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Useful Links -->
+                <div>
+                    <h4 class="text-white font-bold text-sm mb-4">Хэрэгцээт холбоос</h4>
+                    <ul class="space-y-2 text-xs">
+                        <li><a href="#" class="hover:text-white transition">Бидний тухай</a></li>
+                        <li><a href="#" class="hover:text-white transition">Сурталчилгаа байршуулах</a></li>
+                        <li><a href="#" class="hover:text-white transition">Нууцлалын бодлого</a></li>
+                        <li><a href="#" class="hover:text-white transition">Холбоо барих</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Contact & Social -->
+                <div>
+                    <h4 class="text-white font-bold text-sm mb-4">Холбоо барих</h4>
+                    <p class="text-xs text-gray-400 mb-2"><i class="fa-solid fa-location-dot mr-2"></i> Улаанбаатар хот, Сүхбаатар дүүрэг</p>
+                    <p class="text-xs text-gray-400 mb-2"><i class="fa-solid fa-phone mr-2"></i> +976 7011-XXXX</p>
+                    <p class="text-xs text-gray-400 mb-4"><i class="fa-solid fa-envelope mr-2"></i> info@medee.mn</p>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-slate-800 text-center text-xs text-gray-500">
+                © 2026 МЭДЭЭ.MN | Бүх эрх хуулиар хамгаалагдсан.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // MOCK DATA STORE FOR NEWS ARTICLES
+
+        // Strapi-аас мэдээ татаж харуулах функц
+async function fetchNewsFromStrapi() {
+    const STRAPI_URL = 'http://localhost:1337'; // Таны Strapi ажиллаж байгаа хаяг
+    
+    try {
+        // Мэдээний жагсаалт болон зургийг (populate=cover) цуг татна
+        const response = await fetch(`${STRAPI_URL}/api/articles?populate=cover`);
+        const result = await response.json();
+        
+        const newsContainer = document.querySelector('.news-grid');
+        if (!newsContainer) return;
+        
+        // Хуучин гараар бичсэн дээж мэдээг цэвэрлэнэ
+        newsContainer.innerHTML = '';
+
+        result.data.forEach(item => {
+            const article = item.attributes;
+            
+            // Зургийн линк байгаа эсэхийг шалгах
+            const imageUrl = article.cover?.data?.attributes?.url 
+                ? `${STRAPI_URL}${article.cover.data.attributes.url}` 
+                : 'https://via.placeholder.com/600x400';
+
+            const newsCard = `
+                <article class="news-card">
+                    <div class="card-media">
+                        <img src="${imageUrl}" alt="${article.title}">
+                        <span class="category-badge">${article.category || 'Мэдээ'}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-meta">
+                            <span><i class="far fa-clock"></i> ${new Date(item.createdAt).toLocaleDateString('mn-MN')}</span>
+                        </div>
+                        <h3 class="card-title">
+                            <a href="#">${article.title}</a>
+                        </h3>
+                        <p class="card-excerpt">
+                            ${article.summary || ''}
+                        </p>
+                    </div>
+                </article>
+            `;
+            newsContainer.insertAdjacentHTML('beforeend', newsCard);
+        });
+    } catch (error) {
+        console.error('Strapi-аас мэдээ татахад алдаа гарлаа:', error);
+    }
+}
+
+// Хуудас ачаалагдах үед ажиллуулна
+document.addEventListener('DOMContentLoaded', fetchNewsFromStrapi);
+        const CATEGORIES = ['Онцлох', 'Шуурхай', 'Эдийн засаг', 'Уул уурхай', 'Нийслэл', 'Технологи', 'Спорт'];
+
+        const ARTICLES = [
+            {
+                id: 1,
+                title: "Монгол Улсын сэргээгдэх эрчим хүчний томоохон төсөл ашиглалтад орлоо",
+                category: "Технологи",
+                summary: "Говийн бүсэд баригдсан 100МВт-ын нарны ба цахилгаан хуримтлуурын цогцолбор станц төвийн бүсийн эрчим хүчний системд холбогдлоо.",
+                content: `
+                    <p class="text-lg font-medium leading-relaxed">Өнөөдөр Монгол Улсын эрчим хүчний салбарт түүхэн үйл явдал болж, говийн бүсэд баригдсан хамгийн том нарны болон батарей хуримтлуурын цогцолбор станц ашиглалтад орлоо.</p>
+                    <p>Тус төсөл нь жилийн 250 сая кВт.цаг цэвэр цахилгаан эрчим хүч үйлдвэрлэх хүчин чадалтай бөгөөд нийслэл хотын оргил ачааллын үеийн дутагдлыг нөхөхөд чухал ач холбогдолтой юм.</p>
+                    <blockquote class="p-4 my-4 border-l-4 border-brand-600 bg-gray-50 dark:bg-slate-900 font-semibold italic">"Энэхүү станц нь Монгол улс ногоон эрчим хүчний шилжилт хийхэд томоохон алхам болж байна" - Төслийн ерөнхий инженер.</blockquote>
+                    <p>Барилга угсралтын ажилд 500 гаруй дотоодын инженер, техникийн ажилчид оролцсон бөгөөд орчин үеийн AI удирдлагын системийг нэвтрүүлснээр ашиглалтын үр ашгийг 20 хувиар дээшлүүлжээ.</p>
+                `,
+                image: "https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80",
+                date: "10 минутын өмнө",
+                views: 1240,
+                comments: [
+                    { name: "Баяр", text: "Ашгүй дээ, эрчим хүчний хараат бус байдалд том нөлөөтэй." },
+                    { name: "Ганзориг", text: "Маш сайн төсөл болжээ. Амжилт хүсье!" }
+                ],
+                isHero: true
+            },
+            {
+                id: 2,
+                title: "Уул уурхайн салбарын экспортын орлого энэ онд 15%-иар өсөх төлөвтэй байна",
+                category: "Уул уурхай",
+                summary: "Нүүрс болон зэсийн баяжмалын экспорт өссөн нь улсын төсвийн орлогод эерэгээр нөлөөлж эхэллээ.",
+                content: "<p>Эдийн засгийн багийн мэдээлснээр ирэх улиралд гол экспортлох ашигт малтмалын хэмжээ мэдэгдэхүйц нэмэгдэх төлөвтэй байна.</p>",
+                image: "https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=800&q=80",
+                date: "30 минутын өмнө",
+                views: 890,
+                comments: [],
+                isSubHero: true
+            },
+            {
+                id: 3,
+                title: "Нийслэлийн авто замын түгжрэлийг бууруулах шинэ гүүрэн байгууламж нээгдлээ",
+                category: "Нийслэл",
+                summary: "Замын хөдөлгөөний ачааллыг 25% бууруулах тооцоололтой шинэ уулзвар ашиглалтад орлоо.",
+                content: "<p>Нийслэл хотын авто замын сүлжээг тэлэх ажлын хүрээнд шинэ замын байгууламжийн нээлт өнөөдөр боллоо.</p>",
+                image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
+                date: "1 цагийн өмнө",
+                views: 2150,
+                comments: [{ name: "Болд", text: "Зам нь чанартай байгаасай." }],
+                isSubHero: true
+            },
+            {
+                id: 4,
+                title: "Төв банк бодлогын хүүг тогтвортой хадгалахаар шийдвэрлэв",
+                category: "Эдийн засаг",
+                summary: "Инфляцийн түвшин буурч байгаатай холбогдуулан мөнгөний бодлогын төлөвийг хэвээр үлдээлээ.",
+                content: "<p>Мөнгөний бодлогын хорооны ээлжит хуралдаанаар инфляцийн зорилтот түвшинг харгалзан бодлогын хүүг өөрчлөхгүй байхаар тогтов.</p>",
+                image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=80",
+                date: "2 цагийн өмнө",
+                views: 650,
+                comments: []
+            },
+            {
+                id: 5,
+                title: "Монголын стартап компани олон улсын хөрөнгө оруулалтын сангаас 2 сая доллар татлаа",
+                category: "Технологи",
+                summary: "Азийн зах зээлд хиймэл интеллектэд суурилсан програм хангамж нийлүүлдэг 'TechMN' стартап амжилт гаргав.",
+                content: "<p>Дотоодын мэдээллийн технологийн салбарын залуус дэлхийн зах зээлд өрсөлдөх боломжтойг дахин баталлаа.</p>",
+                image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
+                date: "3 цагийн өмнө",
+                views: 3100,
+                comments: [{ name: "Сүхээ", text: "Мундаг байна! Амжилт!" }]
+            },
+            {
+                id: 6,
+                title: "Үндэсний шигшээ баг Азийн аварга шалгаруулах тэмцээнээс хүрэл медаль хүртлээ",
+                category: "Спорт",
+                summary: "Сагсан бөмбөгийн үндэсний шигшээ баг шийдвэрлэх тоглолтод өрсөлдөгч багаа хожлоо.",
+                content: "<p>Тэмцээний сүүлийн минутад шийдвэрлэх оноог авснаар манай баг тамирчид шагналын шатанд шалгарлаа.</p>",
+                image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80",
+                date: "4 цагийн өмнө",
+                views: 1800,
+                comments: []
+            }
+        ];
+
+        // STATE MANAGEMENT
+        let currentCategory = 'all';
+        let savedBookmarks = JSON.parse(localStorage.getItem('news_bookmarks') || '[]');
+        let currentActiveArticle = null;
+
+        // INITIALIZATION
+        document.addEventListener('DOMContentLoaded', () => {
+            initDate();
+            renderCategories();
+            renderHeroSection();
+            renderLatestNews();
+            renderEconomySection();
+            renderTabWidgets();
+            updateBookmarkBadge();
+            setupThemeToggle();
+            setupMobileMenu();
+        });
+
+        // DATE DISPLAY
+        function initDate() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('current-date').innerText = now.toLocaleDateString('mn-MN', options);
+        }
+
+        // RENDER NAV CATEGORIES
+        function renderCategories() {
+            const navContainer = document.getElementById('nav-categories');
+            const mobileNavContainer = document.getElementById('mobile-nav-categories');
+            
+            let navHtml = `<li><button onclick="filterByCategory('all')" class="px-3 py-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-brand-50 dark:hover:bg-slate-800 hover:text-brand-600 transition whitespace-nowrap active-nav">Нүүр</button></li>`;
+            let mobileHtml = `<button onclick="filterByCategory('all'); closeMobileMenu();" class="w-full text-left px-4 py-3 rounded-xl font-medium hover:bg-gray-100 dark:hover:bg-slate-700">Нүүр хуудас</button>`;
+
+            CATEGORIES.forEach(cat => {
+                navHtml += `<li><button onclick="filterByCategory('${cat}')" class="px-3 py-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-brand-50 dark:hover:bg-slate-800 hover:text-brand-600 transition whitespace-nowrap">${cat}</button></li>`;
+                mobileHtml += `<button onclick="filterByCategory('${cat}'); closeMobileMenu();" class="w-full text-left px-4 py-3 rounded-xl font-medium hover:bg-gray-100 dark:hover:bg-slate-700">${cat}</button>`;
+            });
+
+            navContainer.innerHTML = navHtml;
+            mobileNavContainer.innerHTML = mobileHtml;
+        }
+
+        // RENDER HERO SECTION
+        function renderHeroSection() {
+            const hero = ARTICLES.find(a => a.isHero) || ARTICLES[0];
+            const subHeroes = ARTICLES.filter(a => a.isSubHero || (a.id !== hero.id)).slice(0, 2);
+
+            const heroMainContainer = document.getElementById('hero-main-card');
+            heroMainContainer.innerHTML = `
+                <div onclick="openArticleModal(${hero.id})" class="relative group rounded-3xl overflow-hidden cursor-pointer shadow-lg bg-slate-900 h-96 lg:h-[450px]">
+                    <img src="${hero.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-80" alt="${hero.title}">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                    <div class="absolute bottom-0 p-6 sm:p-8 text-white">
+                        <span class="bg-brand-accent text-white text-xs font-bold px-3 py-1 rounded-md uppercase tracking-wider mb-3 inline-block">${hero.category}</span>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold leading-tight mb-2 group-hover:text-brand-100 transition">${hero.title}</h1>
+                        <p class="text-gray-300 text-sm line-clamp-2 hidden sm:block mb-4">${hero.summary}</p>
+                        <div class="flex items-center space-x-4 text-xs text-gray-400">
+                            <span><i class="fa-regular fa-clock mr-1"></i>${hero.date}</span>
+                            <span><i class="fa-regular fa-eye mr-1"></i>${hero.views}</span>
+                            <span><i class="fa-regular fa-comment mr-1"></i>${hero.comments.length}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const heroSubContainer = document.getElementById('hero-sub-cards');
+            heroSubContainer.innerHTML = subHeroes.map(item => `
+                <div onclick="openArticleModal(${item.id})" class="relative group rounded-2xl overflow-hidden cursor-pointer shadow-md bg-slate-900 h-44 lg:h-[215px]">
+                    <img src="${item.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-80" alt="${item.title}">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent"></div>
+                    <div class="absolute bottom-0 p-4 text-white">
+                        <span class="bg-brand-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase mb-1 inline-block">${item.category}</span>
+                        <h3 class="text-sm font-bold leading-snug group-hover:text-brand-100 transition line-clamp-2">${item.title}</h3>
+                        <span class="text-[10px] text-gray-300 mt-2 block"><i class="fa-regular fa-clock mr-1"></i>${item.date}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // RENDER LATEST NEWS LIST
+        function renderLatestNews(filteredData = null) {
+            const list = filteredData || ARTICLES;
+            const container = document.getElementById('latest-news-list');
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-400 py-8">Энэ ангилалд одоогоор мэдээ байхгүй байна.</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => `
+                <div onclick="openArticleModal(${item.id})" class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-sm hover:shadow-md transition flex flex-col sm:flex-row gap-4 cursor-pointer group">
+                    <div class="w-full sm:w-48 h-36 rounded-xl overflow-hidden shrink-0">
+                        <img src="${item.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="${item.title}">
+                    </div>
+                    <div class="flex flex-col justify-between flex-1">
+                        <div>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="bg-gray-100 dark:bg-slate-700 text-brand-600 dark:text-brand-400 text-xs font-bold px-2.5 py-0.5 rounded-md">${item.category}</span>
+                                <span class="text-xs text-gray-400"><i class="fa-regular fa-clock mr-1"></i>${item.date}</span>
+                            </div>
+                            <h3 class="font-bold text-base text-gray-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition line-clamp-2 mb-2">${item.title}</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">${item.summary}</p>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-gray-400 pt-3 mt-2 border-t border-gray-50 dark:border-slate-700/50">
+                            <span class="flex items-center gap-3">
+                                <span><i class="fa-regular fa-eye mr-1"></i>${item.views}</span>
+                                <span><i class="fa-regular fa-comment mr-1"></i>${item.comments.length}</span>
+                            </span>
+                            <span class="text-brand-600 dark:text-brand-400 font-semibold group-hover:underline">Дэлгэрэнгүй &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // RENDER ECONOMY SECTION
+        function renderEconomySection() {
+            const container = document.getElementById('economy-news-grid');
+            const items = ARTICLES.filter(a => a.category === 'Эдийн засаг' || a.category === 'Технологи').slice(0, 2);
+
+            container.innerHTML = items.map(item => `
+                <div onclick="openArticleModal(${item.id})" class="cursor-pointer group">
+                    <div class="h-40 rounded-xl overflow-hidden mb-3">
+                        <img src="${item.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="${item.title}">
+                    </div>
+                    <span class="text-[10px] font-bold text-brand-600 uppercase tracking-wider">${item.category}</span>
+                    <h4 class="font-bold text-sm text-gray-900 dark:text-white group-hover:text-brand-600 transition line-clamp-2 my-1">${item.title}</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">${item.summary}</p>
+                </div>
+            `).join('');
+        }
+
+        // RENDER TABBED WIDGETS
+        function renderTabWidgets() {
+            const popularContainer = document.getElementById('tab-content-popular');
+            const commentedContainer = document.getElementById('tab-content-commented');
+
+            const sortedByViews = [...ARTICLES].sort((a, b) => b.views - a.views).slice(0, 4);
+            const sortedByComments = [...ARTICLES].sort((a, b) => b.comments.length - a.comments.length).slice(0, 4);
+
+            popularContainer.innerHTML = sortedByViews.map((item, idx) => `
+                <div onclick="openArticleModal(${item.id})" class="flex items-center space-x-3 cursor-pointer group">
+                    <span class="font-extrabold text-2xl text-gray-300 dark:text-slate-600 w-6 text-center group-hover:text-brand-600 transition">0${idx + 1}</span>
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-brand-600 transition line-clamp-2">${item.title}</h4>
+                        <span class="text-[10px] text-gray-400"><i class="fa-regular fa-eye mr-1"></i>${item.views} уншсан</span>
+                    </div>
+                </div>
+            `).join('');
+
+            commentedContainer.innerHTML = sortedByComments.map((item, idx) => `
+                <div onclick="openArticleModal(${item.id})" class="flex items-center space-x-3 cursor-pointer group">
+                    <span class="font-extrabold text-2xl text-gray-300 dark:text-slate-600 w-6 text-center group-hover:text-brand-600 transition">0${idx + 1}</span>
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-brand-600 transition line-clamp-2">${item.title}</h4>
+                        <span class="text-[10px] text-gray-400"><i class="fa-regular fa-comment mr-1"></i>${item.comments.length} сэтгэгдэл</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function switchTab(tab) {
+            const popularBtn = document.getElementById('tab-popular-btn');
+            const commentedBtn = document.getElementById('tab-commented-btn');
+            const popularContent = document.getElementById('tab-content-popular');
+            const commentedContent = document.getElementById('tab-content-commented');
+
+            if (tab === 'popular') {
+                popularBtn.className = "flex-1 pb-3 text-center border-b-2 border-brand-600 text-brand-600 dark:text-brand-400 font-bold";
+                commentedBtn.className = "flex-1 pb-3 text-center border-b-2 border-transparent text-gray-400 hover:text-gray-600 font-bold";
+                popularContent.classList.remove('hidden');
+                commentedContent.classList.add('hidden');
+            } else {
+                commentedBtn.className = "flex-1 pb-3 text-center border-b-2 border-brand-600 text-brand-600 dark:text-brand-400 font-bold";
+                popularBtn.className = "flex-1 pb-3 text-center border-b-2 border-transparent text-gray-400 hover:text-gray-600 font-bold";
+                commentedContent.classList.remove('hidden');
+                popularContent.classList.add('hidden');
+            }
+        }
+
+        // FILTER BY CATEGORY
+        function filterByCategory(category) {
+            currentCategory = category;
+            const indicator = document.getElementById('category-filter-indicator');
+            const heroSec = document.getElementById('hero-section');
+            const catName = document.getElementById('current-category-name');
+
+            if (category === 'all') {
+                indicator.classList.add('hidden');
+                heroSec.classList.remove('hidden');
+                renderLatestNews();
+            } else {
+                indicator.classList.remove('hidden');
+                heroSec.classList.add('hidden');
+                catName.innerText = category;
+                const filtered = ARTICLES.filter(a => a.category === category);
+                renderLatestNews(filtered);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ARTICLE MODAL LOGIC
+        function openArticleModal(id) {
+            const article = ARTICLES.find(a => a.id === id);
+            if (!article) return;
+
+            currentActiveArticle = article;
+            article.views += 1; // Increment views
+
+            document.getElementById('modal-image').src = article.image;
+            document.getElementById('modal-category').innerText = article.category;
+            document.getElementById('modal-title').innerText = article.title;
+            document.getElementById('modal-date').innerHTML = `<i class="fa-regular fa-clock mr-1"></i> ${article.date}`;
+            document.getElementById('modal-views').innerHTML = `<i class="fa-regular fa-eye mr-1"></i> ${article.views} уншсан`;
+            document.getElementById('modal-content').innerHTML = article.content;
+
+            // Bookmark Button State Setup
+            const bmBtn = document.getElementById('modal-bookmark-btn');
+            const isBookmarked = savedBookmarks.some(b => b.id === article.id);
+            bmBtn.innerHTML = isBookmarked ? 
+                `<i class="fa-solid fa-bookmark text-amber-400 mr-1"></i> Хадгалсан` : 
+                `<i class="fa-regular fa-bookmark mr-1"></i> Хадгалах`;
+            bmBtn.onclick = () => toggleBookmark(article);
+
+            renderModalComments();
+
+            document.getElementById('article-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeArticleModal() {
+            document.getElementById('article-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            renderTabWidgets(); // Refresh view count UI
+        }
+
+        // COMMENTS SYSTEM
+        function renderModalComments() {
+            if (!currentActiveArticle) return;
+            const container = document.getElementById('modal-comments-list');
+            const countElem = document.getElementById('modal-comment-count');
+            
+            countElem.innerText = currentActiveArticle.comments.length;
+
+            if (currentActiveArticle.comments.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Анхны сэтгэгдлийг бичээрэй.</p>`;
+                return;
+            }
+
+            container.innerHTML = currentActiveArticle.comments.map(c => `
+                <div class="bg-gray-50 dark:bg-slate-900/60 p-3.5 rounded-xl border border-gray-100 dark:border-slate-700">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-xs text-gray-900 dark:text-white"><i class="fa-regular fa-user mr-1 text-brand-600"></i> ${c.name}</span>
+                        <span class="text-[10px] text-gray-400">Дөнгөж сая</span>
+                    </div>
+                    <p class="text-xs text-gray-600 dark:text-gray-300">${c.text}</p>
+                </div>
+            `).join('');
+        }
+
+        function postComment(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('comment-name');
+            const textInput = document.getElementById('comment-text');
+
+            if (!nameInput.value || !textInput.value || !currentActiveArticle) return;
+
+            currentActiveArticle.comments.unshift({
+                name: nameInput.value,
+                text: textInput.value
+            });
+
+            nameInput.value = '';
+            textInput.value = '';
+
+            renderModalComments();
+            renderLatestNews();
+        }
+
+        // BOOKMARKS SYSTEM
+        function toggleBookmark(article) {
+            const index = savedBookmarks.findIndex(b => b.id === article.id);
+            if (index > -1) {
+                savedBookmarks.splice(index, 1);
+            } else {
+                savedBookmarks.push(article);
+            }
+            localStorage.setItem('news_bookmarks', JSON.stringify(savedBookmarks));
+            updateBookmarkBadge();
+
+            // Refresh Modal Button
+            const bmBtn = document.getElementById('modal-bookmark-btn');
+            const isBookmarked = savedBookmarks.some(b => b.id === article.id);
+            bmBtn.innerHTML = isBookmarked ? 
+                `<i class="fa-solid fa-bookmark text-amber-400 mr-1"></i> Хадгалсан` : 
+                `<i class="fa-regular fa-bookmark mr-1"></i> Хадгалах`;
+        }
+
+        function updateBookmarkBadge() {
+            document.getElementById('bookmark-count').innerText = savedBookmarks.length;
+        }
+
+        function openBookmarksModal() {
+            const container = document.getElementById('bookmarks-list');
+            if (savedBookmarks.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-400 py-12 text-sm">Хадгалсан мэдээ байхгүй байна.</p>`;
+            } else {
+                container.innerHTML = savedBookmarks.map(item => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
+                        <div onclick="closeBookmarksModal(); openArticleModal(${item.id});" class="cursor-pointer flex-1 pr-2">
+                            <h4 class="text-xs font-bold line-clamp-2 hover:text-brand-600">${item.title}</h4>
+                            <span class="text-[10px] text-gray-400">${item.category}</span>
+                        </div>
+                        <button onclick="toggleBookmark(ARTICLES.find(a=>a.id===${item.id})); openBookmarksModal();" class="text-red-500 p-2 hover:bg-red-50 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('bookmarks-modal').classList.remove('hidden');
+        }
+
+        function closeBookmarksModal() {
+            document.getElementById('bookmarks-modal').classList.add('hidden');
+        }
+
+        // SEARCH MODAL LOGIC
+        function toggleSearchModal() {
+            const modal = document.getElementById('search-modal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.getElementById('search-input').focus();
+            }
+        }
+
+        function handleSearch(query) {
+            const resultsContainer = document.getElementById('search-results');
+            if (!query.trim()) {
+                resultsContainer.innerHTML = `<p class="text-center text-gray-400 py-8">Хайх үгээ оруулна уу...</p>`;
+                return;
+            }
+
+            const matched = ARTICLES.filter(a => 
+                a.title.toLowerCase().includes(query.toLowerCase()) || 
+                a.summary.toLowerCase().includes(query.toLowerCase())
+            );
+
+            if (matched.length === 0) {
+                resultsContainer.innerHTML = `<p class="text-center text-gray-400 py-8">Илэрц олдсонгүй.</p>`;
+                return;
+            }
+
+            resultsContainer.innerHTML = matched.map(item => `
+                <div onclick="toggleSearchModal(); openArticleModal(${item.id})" class="py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 px-2 rounded-lg transition">
+                    <span class="text-[10px] bg-brand-50 text-brand-600 px-2 py-0.5 rounded font-bold">${item.category}</span>
+                    <h4 class="font-bold text-sm text-gray-800 dark:text-gray-200 mt-1">${item.title}</h4>
+                    <p class="text-xs text-gray-400 line-clamp-1">${item.summary}</p>
+                </div>
+            `).join('');
+        }
+
+        // THEME & MOBILE UI CONTROLS
+        function setupThemeToggle() {
+            const btn = document.getElementById('theme-toggle');
+            btn.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+            });
+        }
+
+        function setupMobileMenu() {
+            document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.remove('hidden');
+            });
+            document.getElementById('close-mobile-menu').addEventListener('click', closeMobileMenu);
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        function copyArticleLink() {
+            const dummy = document.createElement('input');
+            document.body.appendChild(dummy);
+            dummy.value = window.location.href;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+            alert('Мэдээний линк хуулагдлаа!');
+        }
+
+        function handleSubscribe(e) {
+            e.preventDefault();
+            alert('Баярлалаа! Мэдээлэл амжилттай захиалагдлаа.');
+            e.target.reset();
+        }
+    </script>
+</body>
+</html>
